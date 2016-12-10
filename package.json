@@ -16,7 +16,7 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Balmer1/timestamp-api.git"
+    "url": "git+https://github.com/Balmer1/challenges-api.git"
   },
   "bugs": {
     "url": "https://github.com/Balmer1/challenges-api/issues"
