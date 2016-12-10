@@ -1,5 +1,4 @@
 var express = require('express');
-var url = require('url');
 var app = express();
 
 index1 = function(req, res) {
