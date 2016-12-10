@@ -25,9 +25,12 @@ app.set('view engine', 'jade');
 app.get('/:date',index1 );
 app.get('/',index2 );
 
+app.listen(process.env.PORT || <default port>);
 
+/*
 app.listen(3002, function () {
   console.log('Example app listening on port 3002!');
 })
+*/
 
 
