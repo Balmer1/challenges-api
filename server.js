@@ -26,10 +26,8 @@ app.get('/',index2 );
 
 app.listen(process.env.PORT || <default port>);
 
-/*
-app.listen(3002, function () {
-  console.log('Example app listening on port 3002!');
-})
-*/
+
+//app.listen(3002, function () {  console.log('Example app listening on port 3002!');});
+
 
 
