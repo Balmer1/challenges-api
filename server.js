@@ -1,4 +1,5 @@
 var express = require('express');
+var os = require("os");
 var app = express();
 
 timestamp = function(req, res) {
@@ -12,14 +13,11 @@ timestamp = function(req, res) {
 };
 
 whoami = function(req, res) {
-    var date = req.params.date;
-    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    //console.log(req);
     res.json({ 
-        "unix": ip,
-        "natural": 2,
-        "natural2": 3,
+        "ipaddress": req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+        "language": req.headers["accept-language"].split(',', 1)[0],
+        "software": os.type()
     });
 };
 
