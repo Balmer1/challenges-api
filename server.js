@@ -2,6 +2,15 @@ var express = require('express');
 var os = require("os");
 var app = express();
 
+var mongodb = require('mongodb');
+var MongoClient = mongodb.MongoClient;
+//var url = 'mongodb://localhost:27017/urldb';
+var url = process.env.MONGOLAB_URI;
+
+index = function(req, res){
+  res.render('index');
+};
+
 timestamp = function(req, res) {
     var date = req.params.date;
     date = Number(date) * 1000 || date;
@@ -13,7 +22,6 @@ timestamp = function(req, res) {
 };
 
 whoami = function(req, res) {
-
     res.json({ 
         "ipaddress": req.headers['x-forwarded-for'] || req.connection.remoteAddress,
         "language": req.headers["accept-language"].split(',', 1)[0],
@@ -21,19 +29,91 @@ whoami = function(req, res) {
     });
 };
 
+newurl = function(req, res, next) {
+    var path = req.path.substr(1);
+    var heroku_path = 'https://freecodecamp-balmer.herokuapp.com/shorturl/';
+    var id = Math.floor(Math.random()*9000) + 1000;
 
-index = function(req, res){
-  res.render('index');
+    if(isURL(path)){
+		MongoClient.connect(url, function (err, db) {
+		  if (err) {
+			console.log('Unable to connect to the mongoDB server. Error:', err);
+		  } else {
+			var collection = db.collection('urls');
+			var row = {url_id: id, url: path };
+
+			collection.insert([row], function (err, result) {
+			  if (err) {
+				console.log(err);
+			  } else {
+				res.json({ 
+					"original_url": path,
+					"short_url": heroku_path + id
+				});
+			  }
+			  db.close();
+			});
+		  }
+		});
+    }else{
+		res.json({ 
+		    "error": "Wrong url format, make sure you have a valid protocol and real site.",
+		});
+    }
 };
+
+function isURL(str) {
+  var regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
+  if(!regex .test(str)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+geturl = function(req, res){
+	var id = req.params.id;
+	if(isNaN(id)){
+		res.json({ 
+			"error":"This url is not on the database."
+		});
+	}else{
+        MongoClient.connect(url, function (err, db) {
+		  if (err) {
+			console.log('Unable to connect to the mongoDB server. Error:', err);
+		  } else {
+			var collection = db.collection('urls');
+			collection.find({url_id: Number(id)}).toArray(function (err, result) {
+			  if (err) {
+				console.log(err);
+			  }else if (result.length) {
+console.log(result[0].url);
+			    res.redirect(result[0].url);
+			  }else {
+				res.json({ 
+					"error":"This url is not on the database."
+				});
+			  }
+			  db.close();
+			});
+		  }
+		});		
+	}
+}
 
 app.engine('jade', require('jade').__express);
 app.set('views', __dirname + '/');
 app.set('view engine', 'jade');
 
-app.get('/timestamp/:date',timestamp );
-app.get('/timestamp',index );
-app.get('/whoami',whoami );
+app.get('/timestamp/:date', timestamp );
+app.get('/timestamp', index );
+app.get('/whoami', whoami );
+app.use('/shorturl/new', newurl);
+app.get('/shorturl/:id', geturl);
 app.get('/',index );
+
+
+
 
 app.listen(process.env.PORT || 3001);
 
