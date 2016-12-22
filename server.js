@@ -1,11 +1,15 @@
-var express = require('express');
-var os = require("os");
+	var express = require('express');
 var app = express();
-
+var os = require("os");
+var imageSearch = require('node-google-image-search');
+//require('dotenv').config();
 var mongodb = require('mongodb');
 var MongoClient = mongodb.MongoClient;
+
 //var url = 'mongodb://localhost:27017/urldb';
 var url = process.env.MONGOLAB_URI;
+var CSE_ID = process.env.CSE_ID;
+var CSE_API_KEY = process.env.CSE_API_KEY;
 
 index = function(req, res){
   res.render('index');
@@ -101,6 +105,63 @@ console.log(result[0].url);
 	}
 }
 
+function makeList(img) {
+	return {
+	  "url": img.link,
+	  "snippet": img.title,
+	  //"thumbnail": img.thumbnail.url,
+	  "context": img.image.contextLink
+	};
+}
+
+imagesearch = function(req, res) {
+	imageSearch(req.params.searchterm, function (results) {
+		MongoClient.connect(url, function (err, db) {
+		  if (err) {
+			console.log('Unable to connect to the mongoDB server. Error:', err);
+		  } else {
+			var collection = db.collection('search-terms');
+			var d = new Date();
+			var n = d.toISOString();
+			var row = {term: req.params.searchterm, when: n };
+			collection.insert([row], function (err, result) {
+			if (err) {
+				console.log(err);
+			}
+			db.close();
+			});
+		  }
+		});
+        res.send(results.map(makeList));
+	}, Number(req.query.offset), 10);
+}
+
+
+latestimagesearch = function(req, res, next) {
+	MongoClient.connect(url, function (err, db) {
+	  if (err) {
+		console.log('Unable to connect to the mongoDB server. Error:', err);
+	  } else {
+		var collection = db.collection('search-terms');
+
+		collection.find().limit(10).sort({when: -1}).toArray(function (err, results) {
+			if (err) {
+				console.error(err);
+				return res.status(500).end(err.message);
+			}
+			res.json(results.map(function (el) {
+				return {
+					term: el.term,
+					when: el.when
+				};
+			}));
+		});
+
+		db.close();
+	  }
+	});		
+}
+
 app.engine('jade', require('jade').__express);
 app.set('views', __dirname + '/');
 app.set('view engine', 'jade');
@@ -110,12 +171,14 @@ app.get('/timestamp', index );
 app.get('/whoami', whoami );
 app.use('/shorturl/new', newurl);
 app.get('/shorturl/:id', geturl);
+app.get('/imagesearch/:searchterm', imagesearch);
+app.use('/latest/imagesearch', latestimagesearch);
 app.get('/',index );
 
 
 
 
-app.listen(process.env.PORT || 3001);
+app.listen(process.env.PORT || 3000);
 
 
 //app.listen(3002, function () {  console.log('Example app listening on port 3002!');});
