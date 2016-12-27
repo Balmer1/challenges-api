@@ -1,0 +1,23 @@
+extends layout
+block content
+	div(id='topbar', class='navbar navbar-default')
+		p
+			a(href='/', id='title') [ API Project ]
+			span(id='author') By Agustín Balmer
+	div(id='main-full')
+		p API: File Metadata Microservice
+
+		p User stories:
+			ul
+				li I can submit a FormData object that includes a file upload.
+				li When I submit something, I will receive the file size in bytes within the JSON response.
+
+		p Example output:
+			br
+			| {"size":770}
+
+		p Usage:
+		form(action="/upload", method="post", enctype="multipart/form-data")
+			input(class='btn btn-default', type="file", name="file")
+			br
+			input(class='btn btn-default', type="submit")

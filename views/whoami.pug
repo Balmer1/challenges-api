@@ -1,0 +1,19 @@
+extends layout
+block content
+	div(id='topbar', class='navbar navbar-default')
+		p
+			a(href='/', id='title') [ API Project ]
+			span(id='author') By Agustín Balmer
+
+	div(id='main-full')
+		p API: Request Header Parser Microservice
+
+		p User stories:
+			ul
+				li I can get the IP address, language and operating system for my browser.
+		p Example usage:
+			br
+			a(href='/whoami') https://freecodecamp-balmer.herokuapp.com/whoami
+		p Example output:
+			br
+			| {"ipaddress":"154.2.43.168","language":"en-US","software":"Linux"}

@@ -1,0 +1,28 @@
+extends layout
+block content
+	div(id='topbar', class='navbar navbar-default')
+		p
+			a(href='/', id='title') [ API Project ]
+			span(id='author') By Agustín Balmer
+
+	div(id='main-full')
+		p API: URL Shortener Microservice
+
+		p User stories:
+			ul
+				li I can pass a URL as a parameter and I will receive a shortened URL in the JSON response.
+				li If I pass an invalid URL that doesn't follow the valid http://www.example.com format, the JSON response will contain an error instead.
+				li When I visit that shortened URL, it will redirect me to my original link.
+		p Example usage:
+			br
+			a(href='/shorturl/new/https://www.google.com') https://freecodecamp-balmer.herokuapp.com/shorturl/new/https://www.google.com
+		p Example output:
+			br
+			| { "original_url":"https://www.google.com", "short_url":"https://freecodecamp-balmer.herokuapp.com/shorturl/8170" }
+		br
+		p This URL: 
+			br
+			a(href='/shorturl/8897') https://freecodecamp-balmer.herokuapp.com/shorturl/8897
+		p Will redirect to:
+			br
+			| https://www.google.com/
